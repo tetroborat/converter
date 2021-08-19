@@ -68,7 +68,7 @@ def get_rate_in_rubles(buy_currency, currency=load_rate()):
 
 def run(port=8000):
     httpd = HTTPServer(('', port), Server)
-    print(f'Сервер поднят на порту: {port}')
+    print(f'server is up on port: {port}')
     httpd.serve_forever()
 
 

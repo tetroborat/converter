@@ -7,7 +7,6 @@ from urllib import request
 from xml.dom import minidom
 
 import requests as requests
-from requests import Response
 
 import server
 
