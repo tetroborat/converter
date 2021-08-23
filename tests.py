@@ -65,6 +65,19 @@ class Tests(unittest.TestCase):
         status_code = requests.post("http://localhost:8000?begin_currency=USD&end_currency=RUB&sum=100.15/").status_code
         self.assertEqual(status_code, 200)
 
+    def test_path_to_param(self):
+        paths_and_true_params = [
+            'localhost:8000?begin_currency=USD&end_currency=RUB&sum=1470.12',
+            'localhost:8000?begin_currency=USD&sum=1470.12&end_currency=RUB',
+            'localhost:8000?end_currency=RUB&begin_currency=USD&sum=1470.12',
+            'localhost:8000?end_currency=RUB&sum=1470.12&begin_currency=USD',
+            'localhost:8000?sum=1470.12&begin_currency=USD&end_currency=RUB',
+            'localhost:8000?sum=1470.12&end_currency=RUB&begin_currency=USD'
+        ]
+        params = ('USD', 'RUB', '1470.12')
+        for path in paths_and_true_params:
+            self.assertEqual(server.path_to_param(path), params)
+
 
 if __name__ == '__main__':
     unittest.main()

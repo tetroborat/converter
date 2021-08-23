@@ -1,3 +1,4 @@
+import datetime
 import json
 from decimal import Decimal, ROUND_DOWN
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -17,9 +18,7 @@ class Server(BaseHTTPRequestHandler):
 
     def do_POST(self):
         try:
-            path = self.path.split("&")
-            begin_currency, end_currency, begin_sum = path[0].partition('=')[2], path[1].partition('=')[2], \
-                                                      path[2].partition('=')[2]
+            begin_currency, end_currency, begin_sum = path_to_param(self.path)
             self._set_headers()
             rate = get_rate_in_rubles(begin_currency)
             self.wfile.write(json.dumps({
@@ -28,9 +27,40 @@ class Server(BaseHTTPRequestHandler):
                 'begin_sum': begin_sum,
                 'end_sum': get_end_sum(begin_sum, rate)
             }).encode('utf-8'))
+            with open('logs.txt', 'a') as file:
+                file.write(
+                    f'{datetime.datetime.now()}:   '
+                    f'begin_currency: {begin_currency}, '
+                    f'end_currency: {end_currency},'
+                    f'begin_sum: {begin_sum},'
+                    f'end_sum: {get_end_sum(begin_sum, rate)}\n'
+                )
         except:
             self.send_response(400)
             self.end_headers()
+
+
+def path_to_param(path):
+    def partition(param1, param2, param3):
+        return param1.partition('=')[2], param2.partition('=')[2], param3.partition('=')[2]
+
+    path = path.split("&")
+    p1, p2, p3 = path[0], path[1], path[2]
+    if 'begin_currency' in p1:
+        if 'end_currency' in p2:
+            return partition(p1, p2, p3)
+        else:
+            return partition(p1, p3, p2)
+    elif 'end_currency' in p1:
+        if 'begin_currency' in p2:
+            return partition(p2, p1, p3)
+        else:
+            return partition(p3, p1, p2)
+    else:
+        if 'begin_currency' in p2:
+            return partition(p2, p3, p1)
+        else:
+            return partition(p3, p2, p1)
 
 
 def get_end_sum(begin_sum, rate):
